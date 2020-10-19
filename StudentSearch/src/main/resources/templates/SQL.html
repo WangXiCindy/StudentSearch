@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>SQL控制台</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="signin.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+<body onload="load();">
+<script>
+    function load() {
+        var state = [[${state}]]
+        if(state ==-1)alert("错误");
+        else if(state == 1)alert("成功");
+    }
+</script>
+</body>
+<div class="container">
+    <form class="form-signin">
+        <h2 class="form-signin-heading">请输入SQL语句</h2>
+        <label for="" class="sr-only">SQL语句</label>
+        <input type="" id="inputSQL" class="form-control" placeholder="SQL" >
+        <button class="btn btn-lg btn-primary btn-block" type="submit" onclick="sqlsubmit();return false;">提交</button>
+        <button class="btn btn-lg btn-primary btn-block" type="back" onclick="backToIndexs();return false;">返回</button>
+    </form>
+<script>
+    
+    function backToIndexs(){
+        var url = "http://localhost:8080/indexs";
+        window.location.href = url;
+    }
+    
+    function getCookie(cname)
+    {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i<ca.length; i++)
+        {
+            var c = ca[i].trim();
+            if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+        }
+        return "";
+    }
+
+    function sqlsubmit(){
+        if(getCookie("username")!="001"){
+            alert("请登录");
+            window.location.href = "http://localhost:8080/login"
+        }else {
+            var sql = document.getElementById('inputSQL').value;
+            var url = "http://localhost:8080/SQL?SQLcmd="+sql;
+            window.location.href = url;
+        }
+
+    }
+
+
+</script>
+</div> <!-- /container -->
+
+
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+</body>
+</html>
