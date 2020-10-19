@@ -61,5 +61,5 @@
 - StudentTxt
 - StudentSearch
   - 包含后三次作业，使用Mysql+Springboot+百度人脸搜索
-  - 为了避免隐私泄漏，删除了AuthService文件，用于向百度申请access token，如有需要可以前往[百度云API官方文档](https://cloud.baidu.com/doc/FACE/s/Gk37c1uzc，下载到"/StudentSearch/src/main/java/com/example/demo/"文件夹下，修改access key和secret key即可
+  - 为了避免隐私泄漏，删除了AuthService文件，用于向百度申请access token，如有需要可以前往[百度云API官方文档](https://cloud.baidu.com/doc/FACE/s/Gk37c1uzc)，并下载到"/StudentSearch/src/main/java/com/example/demo/"文件夹下，修改access key和secret key即可
 
