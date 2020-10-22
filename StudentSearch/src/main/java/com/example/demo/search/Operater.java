@@ -1,9 +1,10 @@
-package com.example.demo;
+package com.example.demo.search;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.LinkedList;
 import java.util.List;
+import com.example.demo.*;
 
 public class Operater {
     LinkedList <String>  data = new LinkedList<>();

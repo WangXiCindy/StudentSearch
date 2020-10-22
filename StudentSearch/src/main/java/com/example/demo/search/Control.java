@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.search;
 
 import java.io.Serializable;
 

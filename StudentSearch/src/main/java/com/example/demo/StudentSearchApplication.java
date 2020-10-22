@@ -2,6 +2,12 @@ package com.example.demo;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.subject.Subject;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
 import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 
@@ -30,13 +36,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import static java.lang.Math.min;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import com.example.demo.search.*;
 
 @Controller
 @SpringBootApplication
@@ -48,7 +57,13 @@ public class StudentSearchApplication {
 	static FileOperator fileop=new FileOperator();
 	
 	@RequestMapping("indexs")
-	public String indexs(Model model, @RequestParam(defaultValue="2020") String quary,@RequestParam(defaultValue="1") String page,@RequestParam(defaultValue="5") String limit) throws SQLException {
+	public String indexs(Model model, @RequestParam(defaultValue="2020") String quary,@RequestParam(defaultValue="1") String page,@RequestParam(defaultValue="5") String limit,HttpSession session) throws SQLException {
+		
+		String loginstate=(String)session.getAttribute("isLogin");  
+		if(loginstate==null) {
+			return "index";
+		}
+		
 		if(limit=="undefined") 
 			limit="5";
 		ResultSet rs = MySQL.SearchQuary(quary);
@@ -73,8 +88,8 @@ public class StudentSearchApplication {
             student.SetQQ(cache.get(i*5+3));
             student.SetEmail(cache.get(i*5+4));
             allstudent.add(student);
-        }
-
+        }  
+        
         model.addAttribute("all", allstudent);
         model.addAttribute("limit",control.limit);
         model.addAttribute("page",control.pages);
@@ -82,19 +97,19 @@ public class StudentSearchApplication {
         return "indexs";
     }
 	
-	@RequestMapping("index")
-    public String login(Model model){
-        return "index";
-    }
 	
     //登录
 	@RequestMapping(value = "login_sign")
 	@ResponseBody
-    public int login_sign(@RequestParam("username") String username,@RequestParam("password") String password){
+    public int login_sign(@RequestParam("username") String username,@RequestParam("password") String password,HttpSession session){
         ResultSet resultSet = null;
         try{    
-            resultSet = MySQL.SQLquary("select * from users where username  = "+username+" and password ="+password);
+            resultSet = MySQL.SQLquary("select * from users where id  = "+username+" and password ="+password);
             if (resultSet != null && resultSet.next()){
+            	
+                //把用户数据保存在session域对象中
+            	session.setAttribute("isLogin","yes");
+                session.setAttribute("loginName", username);
             	return 0;
             }
             else return 1;
@@ -103,11 +118,19 @@ public class StudentSearchApplication {
         }
         return 0;
     }
+	
+	
     
 	//insert into javafind values(202092177,"张朝亮","15524376928",null,"chaoliang@dlut.edu.cn");
     //增删改功能
 	@RequestMapping("SQL")
-	public String SQL(Model model,@RequestParam(defaultValue="l") String SQLcmd) {
+	public String SQL(Model model,@RequestParam(defaultValue="l") String SQLcmd,HttpSession session) {
+		
+		String loginstate=(String)session.getAttribute("isLogin");  
+		if(loginstate==null) {
+			return "index";
+		}
+		
 		String state="-2";
         if(SQLcmd.equals("l"))
             state = "0";
@@ -122,7 +145,13 @@ public class StudentSearchApplication {
 	//上传文件功能
     @RequestMapping("upload")
     //@RequestParam(value="file",required=false) MultipartFile file
-    public String upload(Model model,HttpServletRequest httpRequest) {
+    public String upload(Model model,HttpServletRequest httpRequest,HttpSession session) {
+    	
+    	String loginstate=(String)session.getAttribute("isLogin");  
+		if(loginstate==null) {
+			return "index";
+		}
+    	
     	String state="-2";
     	if (httpRequest instanceof MultipartHttpServletRequest) {
     		MultipartHttpServletRequest request = (MultipartHttpServletRequest) httpRequest;

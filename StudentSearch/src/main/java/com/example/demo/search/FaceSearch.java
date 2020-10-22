@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.search;
 
 import com.baidu.ai.aip.utils.HttpUtil;
 import com.baidu.ai.aip.utils.GsonUtils;
@@ -8,7 +8,7 @@ import com.baidu.ai.aip.utils.FileUtil;
 import java.util.*;
 import org.apache.commons.net.util.Base64;
 import java.io.UnsupportedEncodingException;
-
+import com.example.demo.*;
 /**
 * 人脸搜索
 */

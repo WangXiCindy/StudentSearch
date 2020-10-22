@@ -1,0 +1,6 @@
+server:
+  port: 8080
+  session:
+    timeout: 7200
+
+
