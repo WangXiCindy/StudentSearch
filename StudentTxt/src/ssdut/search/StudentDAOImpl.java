@@ -10,7 +10,7 @@ public class StudentDAOImpl implements StudentDAO {
 	private List<Student> allStudent=null;
 	public StudentDAOImpl() throws Exception {
 		//通过构造方法获得数据库的连接
-		this.filePath="/Users/CindyWang/Documents/program_practise/java/j2ee/StudentTxt/WebContent/WEB-INF/contact/data.txt";
+		this.filePath="/(Your own folder)你的文件夹为位置/StudentSearch/StudentTxt/WEB-INF/contact/data.txt";
 		allStudent=findAll();
 	}
  

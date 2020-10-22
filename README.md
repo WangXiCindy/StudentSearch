@@ -63,7 +63,7 @@
   - src
     - ssdut.search：各种java文件
   - WebContent
-    - index.jsp：主页
+    - index.jsp：主页，需要使用tomcat9.0在server上运行
     - META-INF
     - WEB-INF
       - contact：数据文件
@@ -77,6 +77,7 @@
     - main.java.com.baidu.ai.aip.utils
       - 调用百度api所需要的包
     - main.java.com.example.demo
+      - StudentSearchApplication.java：使用java application运行该文件
       - search：实现查找所需要的文件
     - resources
       - applications.properties
@@ -91,5 +92,6 @@
 # 注意事项
 
 - 包含后三次作业，使用Mysql+Springboot+百度人脸搜索
+- 为了避免隐私泄漏，如果你需要运行StudentTxt，请修改StudentDAOImpl.java文件中的数据所在位置
 - 为了避免隐私泄漏，删除了demo文件夹下AuthService文件，用于向百度申请access token，如有需要可以前往[百度云API官方文档](https://cloud.baidu.com/doc/FACE/s/Gk37c1uzc)，并下载到"/StudentSearch/src/main/java/com/example/demo/"文件夹下，修改access key和secret key即可
 
