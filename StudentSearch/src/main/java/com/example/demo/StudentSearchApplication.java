@@ -32,13 +32,17 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletContext;
 
 import static java.lang.Math.min;
 import com.alibaba.fastjson.JSON;
@@ -46,6 +50,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import com.example.demo.search.*;
+
+//聊天用包
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+
 
 @Controller
 @SpringBootApplication
@@ -59,8 +71,9 @@ public class StudentSearchApplication {
 	@RequestMapping("indexs")
 	public String indexs(Model model, @RequestParam(defaultValue="2020") String quary,@RequestParam(defaultValue="1") String page,@RequestParam(defaultValue="5") String limit,HttpSession session) throws SQLException {
 		
-		String loginstate=(String)session.getAttribute("isLogin");  
-		if(loginstate==null) {
+		String name=(String) session.getAttribute("username");
+
+		if(name==null) {
 			return "index";
 		}
 		
@@ -72,8 +85,8 @@ public class StudentSearchApplication {
             cache.add(rs.getString("id"));
             cache.add(rs.getString("name"));
             cache.add(rs.getString("phone"));
-            cache.add(rs.getString("Email"));
             cache.add(rs.getString("qq"));
+            cache.add(rs.getString("Email"));
         }
         List<Student> allstudent = new ArrayList<>();
         Control control = new Control();
@@ -97,19 +110,48 @@ public class StudentSearchApplication {
         return "indexs";
     }
 	
+	//查看是否在线
+	@RequestMapping(value = "find_online")
+	@ResponseBody
+	public String find_online(@RequestParam("username") String username,HttpSession session){
+		String name="";
+		ServletContext application=session.getServletContext();
+	    List<String> userOnlineList= (List<String>) application.getAttribute("userOnlineList");
+	    if(userOnlineList.contains(username)){
+	       name=(String) session.getAttribute("username");
+	    }
+	    System.out.println(name);
+	    return name;
+	}
+	
+	//聊天
+	/*@RequestMapping("websocket")
+	public String chat(){
+		return "websocket";
+	}*/
 	
     //登录
 	@RequestMapping(value = "login_sign")
 	@ResponseBody
     public int login_sign(@RequestParam("username") String username,@RequestParam("password") String password,HttpSession session){
+		
         ResultSet resultSet = null;
         try{    
             resultSet = MySQL.SQLquary("select * from users where id  = "+username+" and password ="+password);
             if (resultSet != null && resultSet.next()){
             	
-                //把用户数据保存在session域对象中
-            	session.setAttribute("isLogin","yes");
-                session.setAttribute("loginName", username);
+            	//把用户数据保存在session域对象中
+                session.setAttribute("username", username);
+                session.setAttribute("userOnlineListener", new UserOnlineListener(username));
+                System.out.println("当前登录用户的sessionId"+session.getId());
+            	
+                ServletContext application=session.getServletContext();
+        	    List<String> userOnlineList= (List<String>) application.getAttribute("userOnlineList");
+        	    if(userOnlineList!=null){
+        	       System.out.println("在线用户数:"+userOnlineList.size());
+        	    }
+                
+                
             	return 0;
             }
             else return 1;
@@ -119,27 +161,53 @@ public class StudentSearchApplication {
         return 0;
     }
 	
-	
-    
-	//insert into javafind values(202092177,"张朝亮","15524376928",null,"chaoliang@dlut.edu.cn");
-    //增删改功能
 	@RequestMapping("SQL")
-	public String SQL(Model model,@RequestParam(defaultValue="l") String SQLcmd,HttpSession session) {
-		
-		String loginstate=(String)session.getAttribute("isLogin");  
-		if(loginstate==null) {
+	public String SQL(Model model,@RequestParam(defaultValue="l") String id,@RequestParam(defaultValue="l") String name,@RequestParam(defaultValue="l") String phone,@RequestParam(defaultValue="l") String qq,@RequestParam(defaultValue="l") String email,HttpServletRequest request,HttpSession session) {
+		String username=(String) session.getAttribute("username");
+
+		if(username==null) {
 			return "index";
 		}
 		
-		String state="-2";
-        if(SQLcmd.equals("l"))
-            state = "0";
+		if(id=="l")
+			return "indexs";
+		
+		model.addAttribute("id", id);
+        model.addAttribute("name",name);
+        model.addAttribute("phone",phone);
+        model.addAttribute("qq",qq);
+        model.addAttribute("email",email);
+        
+        System.out.println(request.getQueryString());
+        //return request.getRequestURL()+"?"+request.getQueryString();
+        return "SQL";
+	}
+    
+	//insert into javafind values(202092177,"张朝亮","15524376928",null,"chaoliang@dlut.edu.cn");
+    //增删改功能
+	@RequestMapping(value = "Sql_change")
+	@ResponseBody
+	public int Sql_change(@RequestParam("id") String id,@RequestParam("newname") String name,@RequestParam("newphone") String phone,@RequestParam("newqq") String qq,@RequestParam("newemail") String email) {
+		String SQLcmd;
+		if(email=="null"&&qq!="null") {
+			SQLcmd="update javafind set name=\""+name+"\",phone=\""+phone+"\",qq=\""+qq+"\" where id="+id;
+			System.out.println(email+" "+qq);
+		}
+		else if(email!="null"&&qq=="null")
+			SQLcmd="update javafind set name=\""+name+"\",phone=\""+phone+"\",email=\""+email+"\" where id="+id;
+		else if(email=="null"&&qq=="null")
+			SQLcmd="update javafind set name=\""+name+"\",phone=\""+phone+"\" where id="+id;
+		SQLcmd="update javafind set name=\""+name+"\",phone=\""+phone+"\",qq=\""+qq+"\",email=\""+email+"\" where id="+id;
+		System.out.println(SQLcmd);
+		//String SQLcmd="update javafind set name="+name+",phone="+phone+",qq="+qq+",email="+email+" where id="+id;
+        if(id.equals("l")) {
+            return 0;
+        }
         else{
             if(MySQL.Change(SQLcmd)==false)
-            	state= "-1";
+            	return -1;
         }
-        model.addAttribute("state", state);
-        return "SQL";
+        return 1;
 	}
 	
 	//上传文件功能
@@ -147,8 +215,9 @@ public class StudentSearchApplication {
     //@RequestParam(value="file",required=false) MultipartFile file
     public String upload(Model model,HttpServletRequest httpRequest,HttpSession session) {
     	
-    	String loginstate=(String)session.getAttribute("isLogin");  
-		if(loginstate==null) {
+    	String name=(String) session.getAttribute("username");
+
+		if(name==null) {
 			return "index";
 		}
     	
@@ -182,9 +251,10 @@ public class StudentSearchApplication {
     	model.addAttribute("state", state);
     	return "upload";
     }
-	
     
+
     public String findUser(String fileName) {
+    	
     	
     	String findUsers=FaceSearch.faceSearch(fileName);
     	

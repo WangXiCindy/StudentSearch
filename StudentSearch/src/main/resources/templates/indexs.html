@@ -29,19 +29,21 @@
         <label for="inputmessage" class="sr-only">请输入信息</label>
         <input type="message" id="inputmessage" class="form-control" placeholder="请输入 学号、姓名、电话号码、QQ、Email中的任意一个，支持模糊查询" required="" autofocus="">
         <button class="btn btn-lg btn-primary btn-block"  type="submit" onclick="findpeople(1,0);return false;">查询</button>
-        <button class="btn btn-lg btn-primary btn-block"  type="Change" onclick="jumpToSQL(); return false;">修改信息</button>
         <button class="btn btn-lg btn-primary btn-block"  type="findUser" onclick="jumpToUpload(); return false;">照片找人</button>
     </form>
         <table class="table table-bordered">
             <caption>查询结果</caption>
             <thead>
-        <tr><td>No.</td><td>姓名</td><td>电话</td><td>QQ</td><td>Email</td></tr>
+        <tr><td>No.</td><td>姓名</td><td>电话</td><td>QQ</td><td>Email</td><td>修改信息</td><td>聊天按钮</td></tr>
         <tr th:each="student,memberStat:${all}">
             <td th:text="${student.No}"/>
             <td th:text="${student.name}"/>
             <td th:text="${student.phone}"/>
-            <td th:text="${student.Email}"/>
             <td th:text="${student.QQ}"/>
+            <td th:text="${student.Email}"/>
+            <td><button th:userid="${student.No}" th:name="${student.name}" th:phone="${student.phone}" th:qq="${student.QQ}" th:email="${student.Email}" class="btn btn-lg btn-primary"  type="Change" onclick="jumpToSQL(this); return false;">修改信息</button>
+            <td><button th:userid="${student.No}" class="btn btn-lg btn-primary"  type="findUser" onclick="Chat(this); return false;">聊天</button>
+            </td>
         </tr>
     </table>
     <ul class="pagination">
@@ -96,14 +98,38 @@
         window.location.href = url;
     };
 
-    function jumpToSQL(){
-        var url = "http://localhost:8080/SQL";
+    function jumpToSQL(e){
+        var id=e.getAttribute("userid")
+        var name=e.getAttribute("name")
+        var phone=e.getAttribute("phone")
+        var qq=e.getAttribute("qq")
+        var email=e.getAttribute("email")
+        var url = "http://localhost:8080/SQL?id="+id+"&name="+name+"&phone="+phone+"&qq="+qq+"&email="+email;
         window.location.href = url;
     }
 
     function jumpToUpload(){
         var url = "http://localhost:8080/upload";
         window.location.href = url;
+    }
+
+    function Chat(e){
+        var name=e.getAttribute("userid")
+        jQuery.post("find_online",{username:name},function (anoname) {
+            if(anoname!=""){
+                alert("进入聊天室");
+                var url = "http://localhost:8080/websocket";
+                if(name>anoname)
+                    url+="/id1="+name+"&id2"+anoname+"/"+name;
+                else
+                    url+="id1="+anoname+"&id2="+name+"/"+name;
+                window.location.href = url;
+                
+            }else{
+                alert("对方尚未在线");
+            }
+            return;
+        });
     }
 
 </script>
