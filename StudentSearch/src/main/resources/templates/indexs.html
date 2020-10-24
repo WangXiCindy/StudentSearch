@@ -118,11 +118,8 @@
         jQuery.post("find_online",{username:name},function (anoname) {
             if(anoname!=""){
                 alert("进入聊天室");
-                var url = "http://localhost:8080/websocket";
-                if(name>anoname)
-                    url+="/id1="+name+"&id2"+anoname+"/"+name;
-                else
-                    url+="id1="+anoname+"&id2="+name+"/"+name;
+                var url = "http://localhost:8080/chat"+"?From="+name+"&To="+anoname;
+
                 window.location.href = url;
                 
             }else{

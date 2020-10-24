@@ -48,7 +48,7 @@ import static java.lang.Math.min;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
+import com.example.demo.chat.*;
 import com.example.demo.search.*;
 
 //聊天用包
@@ -189,14 +189,7 @@ public class StudentSearchApplication {
 	@ResponseBody
 	public int Sql_change(@RequestParam("id") String id,@RequestParam("newname") String name,@RequestParam("newphone") String phone,@RequestParam("newqq") String qq,@RequestParam("newemail") String email) {
 		String SQLcmd;
-		if(email=="null"&&qq!="null") {
-			SQLcmd="update javafind set name=\""+name+"\",phone=\""+phone+"\",qq=\""+qq+"\" where id="+id;
-			System.out.println(email+" "+qq);
-		}
-		else if(email!="null"&&qq=="null")
-			SQLcmd="update javafind set name=\""+name+"\",phone=\""+phone+"\",email=\""+email+"\" where id="+id;
-		else if(email=="null"&&qq=="null")
-			SQLcmd="update javafind set name=\""+name+"\",phone=\""+phone+"\" where id="+id;
+		
 		SQLcmd="update javafind set name=\""+name+"\",phone=\""+phone+"\",qq=\""+qq+"\",email=\""+email+"\" where id="+id;
 		System.out.println(SQLcmd);
 		//String SQLcmd="update javafind set name="+name+",phone="+phone+",qq="+qq+",email="+email+" where id="+id;
@@ -252,6 +245,28 @@ public class StudentSearchApplication {
     	return "upload";
     }
     
+    //聊天
+    @Autowired
+    private WebSocketOneToOne webSocketOneToOne;
+    /**
+     * 登录界面直接聊天
+     * **/
+    @RequestMapping("chat")
+    public String user_1(@RequestParam("From") String fromId,@RequestParam("To")String toId,HttpSession session){
+    	System.out.println("fromId");
+    	session.setAttribute("fromId", fromId);
+    	session.setAttribute("toId",toId);
+        return "chat";
+    }
+    /**
+     * 发送消息 消息内容,发送人,接收人,会话标识
+     * **/
+    @RequestMapping("message")
+    public void message(String msg,String from,String to,String socketId){
+        webSocketOneToOne.send(msg, from, to, socketId);
+ 
+    }
+
 
     public String findUser(String fileName) {
     	
