@@ -58,6 +58,8 @@
     //关闭WebSocket连接
     function closeWebSocket() {
         websocket.close();
+        var url = "http://localhost:8080/indexs";
+        window.location.href = url;
     }
     //发送消息
     function send() {
@@ -75,11 +77,11 @@
     <!--<br/>发送：<input id="text" type="text" />-->
     <br/>
     
-    <input id="text" type="text" placeholder="在此输入文字信息..."/></br>
+    <input id="text" type="text" autocomplete="off" placeholder="在此输入文字信息..."/></br>
     </br>
     <button class="btn btn-primary" onclick="send()">发送消息</button>
     
-    <button class="btn btn-primary"onclick="closeWebSocket()">关闭WebSocket连接</button>
+    <button class="btn btn-primary"onclick="closeWebSocket()">返回</button>
     <div id="message"></div>
 </main>
 

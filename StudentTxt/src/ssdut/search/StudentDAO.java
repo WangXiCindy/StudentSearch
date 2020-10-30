@@ -3,6 +3,8 @@ package ssdut.search;
 
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
  
 public interface StudentDAO {
 	
@@ -12,9 +14,9 @@ public interface StudentDAO {
 	
 	public int findCount() throws Exception;
 
-	public List<Student> findByPage(int currentPage,int pageSize) throws Exception;
+	public List<Student> findByPage(int currentPage,int pageSize,HttpSession session) throws Exception;
 
-	public List<Student> findAllByPage(String keyWord,int currentPage, int pageSize) throws Exception;
+	public List<Student> findAll(String keyWord,int currentPage, int pageSize,HttpSession session) throws Exception;
 
 }
 

@@ -19,25 +19,48 @@ Student ss=null;
 <%int currentPage = 1 ;	// 为当前所在的页，默认在第1页
 int lineSize = 5 ;		// 每次显示的记录数
 int pageSize = 1 ;		// 表示全部的页数（尾页）
-int flag=0;				//表示是否为查找keyword模式
 %>
 <%    String s=request.getParameter("realPage");
+	  String z=request.getParameter("realSize");
       String keyWord=request.getParameter("query");
-if(s!=null){
-	  currentPage = Integer.parseInt(s);
+
+if(request.getSession().getAttribute("nowFlag")!=null){
+	if(z!=null&&z!=""){
+		  lineSize = Integer.parseInt(z);
+		  //System.out.println("realSize="+String.valueOf(lineSize));
+	}
+	else{
+		lineSize=(int)request.getSession().getAttribute("nowSize"); 
+		//System.out.println("nowSize="+String.valueOf(lineSize));
+	}
+	if(s!=null&&s!=""){
+		  currentPage = Integer.parseInt(s);
+		  //System.out.println("realPage="+String.valueOf(currentPage));
+	}
+	else{
+		currentPage = (int)request.getSession().getAttribute("nowPage"); 
+		//System.out.println("nowPage="+String.valueOf(currentPage));
+	}
+}
+else{
+	request.getSession().setAttribute("nowFlag",1);
+	request.getSession().setAttribute("nowPage",1);
+	request.getSession().setAttribute("nowSize",5);
 }
 if("".equals(keyWord)||keyWord==null||"全部".equals(keyWord)||"null".equals(keyWord)){
-	flag=0;
-	all=stud.getIStudentDAOInstance().findByPage((currentPage-1), lineSize);
+	all=stud.getIStudentDAOInstance(request).findByPage((currentPage-1), lineSize,request.getSession());
 }else{
-	flag=1;
-	all=stud.getIStudentDAOInstance().findAll(keyWord);
+	//all=stud.getIStudentDAOInstance().findAll(keyWord);
+    all=stud.getIStudentDAOInstance(request).findAll(keyWord,(currentPage-1), lineSize,request.getSession());
 }
 
 Iterator<Student>it=all.iterator();
-pageSize=stud.getIStudentDAOInstance().findCount()%lineSize==0?
-		stud.getIStudentDAOInstance().findCount()/lineSize:stud.getIStudentDAOInstance().findCount()/lineSize+1;
-  
+pageSize=stud.getIStudentDAOInstance(request).findCount()%lineSize==0?
+		stud.getIStudentDAOInstance(request).findCount()/lineSize:stud.getIStudentDAOInstance(request).findCount()/lineSize+1;
+if(currentPage>pageSize){
+	currentPage=1;
+}
+//System.out.println("current="+String.valueOf(currentPage)+"Size="+String.valueOf(pageSize));
 %>
  
 <script language="javaScript">
@@ -45,7 +68,10 @@ pageSize=stud.getIStudentDAOInstance().findCount()%lineSize==0?
 	 document.getElementById("realPage").value = num;
 	 document.myform.submit();
 }
- 
+function change(num){
+	 document.getElementById("realSize").value = num;
+	 document.myform.submit();
+}
 </script>
  
 <center>
@@ -64,7 +90,9 @@ pageSize=stud.getIStudentDAOInstance().findCount()%lineSize==0?
  
 <%while(it.hasNext()){
 	ss=it.next();%>
+	
 <tr>
+
 <td><%=ss.getId() %></td>
 <td><%=ss.getName() %></td>
 <td><%=ss.getPhone() %></td>
@@ -75,16 +103,13 @@ pageSize=stud.getIStudentDAOInstance().findCount()%lineSize==0?
 <%} %>
 <tr>
 <td><input type="button" value="首页"  onclick="go(<%=1%>)" 
-<%=(currentPage==1 | flag==1)?"DISABLED":""%>></td>
+<%=(currentPage==1)?"DISABLED":""%>></td>
 <td><input type="button" value="上一页" onclick="go(<%=currentPage-1%>)"
-<%=(currentPage==1 | flag==1)?"DISABLED":""%>></td>
+<%=(currentPage==1)?"DISABLED":""%>></td>
 <td><input type="button" value="下一页" onclick="go(<%=currentPage+1%>)"
-<%=(currentPage==pageSize | flag==1)?"DISABLED":""%>></td>
+<%=(currentPage==pageSize)?"DISABLED":""%>></td>
 <td>跳转到<select name="jump" onchange="go(this.value)">
 		<%	int nowpageSize=pageSize;
-			if(flag==1){
-				nowpageSize=1;
-			}
 		%>
 		<%
 			for(int i=1;i<=nowpageSize;i++){
@@ -94,15 +119,23 @@ pageSize=stud.getIStudentDAOInstance().findCount()%lineSize==0?
 			}
 		%>
 		</select>页</td>
- 
- 
- 
-<td><input type="button" value="尾页" onclick="go(<%=pageSize%>)"
-<%=(currentPage==pageSize | flag==1)?"DISABLED":""%>></td>
+
+<td>显示<select name="chaSize" onchange="change(this.value)">
+		<%
+			for(int i=5;i<=20;i+=5){
+		%>
+			<option value="<%=i%>" <%=i==lineSize?"SELECTED":""%>><%=i%></option>
+		<%
+			}
+		%>
+		</select>条</td>
+
  
 </tr>
 </table>
-<input type="hidden" name="realPage" id="realPage" value="1">
+<input type="hidden" name="realPage" id="realPage">
+<input type="hidden" name="realSize" id="realSize">
+
 </form>
 </center>
  

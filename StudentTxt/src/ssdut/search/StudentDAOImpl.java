@@ -2,15 +2,18 @@ package ssdut.search;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
  
 public class StudentDAOImpl implements StudentDAO {
  
 	private String filePath=null;
 	private List<Student> allStudent=null;
-	public StudentDAOImpl() throws Exception {
-		//通过构造方法获得数据库的连接
-		this.filePath="/(Your own folder)你的文件夹为位置/StudentSearch/StudentTxt/WEB-INF/contact/data.txt";
+	public StudentDAOImpl(HttpServletRequest request) throws Exception {
+		this.filePath=request.getServletContext().getRealPath("/WEB-INF/contact/data.txt");
+		//System.out.println(this.filePath);
 		allStudent=findAll();
 	}
  
@@ -48,7 +51,7 @@ public class StudentDAOImpl implements StudentDAO {
             	s.setEmail(readList.get(i));
             	e+=6;
             	all.add(s);
-            	System.out.println(s.getId()+" "+s.getName()+" "+s.getPhone()+" "+s.getQQ()+" "+s.getEmail());
+            	//System.out.println(s.getId()+" "+s.getName()+" "+s.getPhone()+" "+s.getQQ()+" "+s.getEmail());
             	s=new Student();
             }
             else
@@ -74,11 +77,18 @@ public class StudentDAOImpl implements StudentDAO {
 		return res;
 	}
 	
-	public List<Student> findAllByPage(String keyWord,int currentPage, int lineSize) throws Exception {
+	public List<Student> findAll(String keyWord,int currentPage, int lineSize,HttpSession session) throws Exception {
+		session.setAttribute("nowPage", currentPage+1);
+		session.setAttribute("nowSize", lineSize);
 		List<Student> res=new ArrayList<Student>();
-		System.out.println("currentPage"+String.valueOf(currentPage)+" pageSize"+String.valueOf(lineSize));
+		//System.out.println("currentPage"+String.valueOf(currentPage)+" pageSize"+String.valueOf(lineSize));
 		int total=lineSize*(currentPage);
 		int nextotal=lineSize*(currentPage+1);
+		if(total<0 || nextotal<0) {
+			total=0;
+			nextotal=lineSize;
+		}
+		System.out.println("quary "+keyWord+" total "+String.valueOf(total)+" nextotal "+String.valueOf(nextotal));
 		int now=0;
 		for(int i=0;i<this.allStudent.size();i++) {
 			Student s=this.allStudent.get(i);
@@ -88,25 +98,42 @@ public class StudentDAOImpl implements StudentDAO {
 			String qq=s.getQQ();
 			String Email=s.getEmail();
 			if(id.indexOf(keyWord)!=-1 | name.indexOf(keyWord)!=-1 | phone.indexOf(keyWord)!=-1 | qq.indexOf(keyWord)!=-1 | Email.indexOf(keyWord)!=-1) {
-				if(now>=total&&now<nextotal)
+				now++;
+				if(now>=total&&now<=nextotal) {
+					//System.out.println(s.getId()+" "+s.getName()+" "+s.getPhone()+" "+s.getQQ()+" "+s.getEmail());
 					res.add(s);
+				}
 				else if(now>=nextotal)
 					break;
 			}
+		}
+		if(res==null) {
+			res=findAll(keyWord,0, lineSize,session);
 		}
 		
 		return res;
 	}
 	
 	@Override
-	public List<Student> findByPage(int currentPage, int lineSize) throws Exception{
+	public List<Student> findByPage(int currentPage, int lineSize,HttpSession session) throws Exception{
+		
+		session.setAttribute("nowPage", currentPage+1);
+		session.setAttribute("nowSize", lineSize);
+		
 		List<Student> res=new ArrayList<Student>();
 		 
 		int total=lineSize*(currentPage);
 		int nextotal=lineSize*(currentPage+1);
+		if(total<0 || nextotal<0) {
+			total=0;
+			nextotal=lineSize;
+		}
 		for(int i=total;i<nextotal&&i<this.allStudent.size();i++) {
 			Student s=this.allStudent.get(i);
 			res.add(s);
+		}
+		if(res==null) {
+			res=findByPage(0, lineSize,session);
 		}
 		return res;
 	}

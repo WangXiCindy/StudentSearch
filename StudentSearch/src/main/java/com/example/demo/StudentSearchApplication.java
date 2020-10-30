@@ -221,7 +221,9 @@ public class StudentSearchApplication {
 	        // 获取原始名字
 	        String fileName = file.getOriginalFilename();
 	        // 文件保存路径
-	        String filePath = "/Users/CindyWang/Documents/program_practise/java/j2ee/StudentSearch/WebContent/imgs/";
+	        //String filePath = "../StudentSearch/WebContent/imgs/";
+	        String filePath =request.getServletContext().getRealPath("/imgs/");
+	        System.out.println(filePath);
 	        // 文件重命名，防止重复
 	        fileName = filePath + fileName;
 	        // 文件对象
@@ -253,6 +255,13 @@ public class StudentSearchApplication {
      * **/
     @RequestMapping("chat")
     public String user_1(@RequestParam("From") String fromId,@RequestParam("To")String toId,HttpSession session){
+    	
+    	String name=(String) session.getAttribute("username");
+
+		if(name==null) {
+			return "index";
+		}
+    	
     	System.out.println("fromId");
     	session.setAttribute("fromId", fromId);
     	session.setAttribute("toId",toId);
