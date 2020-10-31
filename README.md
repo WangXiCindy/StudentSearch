@@ -89,8 +89,17 @@
   - WebContent
     - imgs：保存上传的图片
 
-# 注意事项
+# 项目环境
+- Eclipse Version: 2020-06 (4.16.0)
+- JDK：8u251
+- Tomcat 9.0
+- MySQL（请使用JDBC连接）
+- springboot（无需配置，直接使用pom.xml即可）
+- Websocket（无需配置，直接使用pom.xml即可）
+- 百度人脸搜索API，需要自行设置人脸库，如有需要可以前往[百度云API官方文档](https://cloud.baidu.com/doc/FACE/s/Gk37c1uzc)
 
-- 包含所有作业，使用Mysql+Springboot+百度人脸搜索
-- 你需要修改demo文件夹下AuthService文件，用于向百度申请access token，如有需要可以前往[百度云API官方文档](https://cloud.baidu.com/doc/FACE/s/Gk37c1uzc)，并下载到"/StudentSearch/src/main/java/com/example/demo/"文件夹下，修改access key和secret key即可
+# 注意事项
+- StudentTxt项目包含前两次作业，请直接index.jsp在server上运行
+- StudentSearch项目包含后三次作业，使用Mysql+Springboot+百度人脸搜索
+- 你需要修改demo文件夹下AuthService文件，修改为你向百度申请的access token
 
